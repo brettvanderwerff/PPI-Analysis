@@ -1,10 +1,8 @@
-import id_parser
-import pandas as pd
-
-
 '''
 Script exchanges Biogrid IDs for swissprot IDs in a dataframe returned from the id_parser script.
 '''
+import id_parser
+import pandas as pd
 
 def replace_biogrid_id(df, label):
     '''Will replace each biogrid ID with a swissprot ID for protein A or protein B in the dataframe gotten from the
@@ -25,7 +23,6 @@ def run(id_parsed_df):
     update_df_A = replace_biogrid_id(df=id_parsed_df, label='Parsed A ID')
     update_df_B = replace_biogrid_id(df=update_df_A, label='Parsed B ID')
     return update_df_B
-
 
 if __name__ == '__main__':
     id_parsed_df = id_parser.run(filename='clusteredQuery_MST1R.txt')
