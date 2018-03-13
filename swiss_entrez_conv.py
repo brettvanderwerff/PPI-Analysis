@@ -9,7 +9,7 @@ def get_swiss_entrez_conv(in_filename, out_filename):
     swiss_entrez = read_file[[0,2]] #only grab uniprot and entrez id columns
     swiss_entrez.columns = ['uniprot_id', 'entrez_id']
     swiss_entrez_drop_na = swiss_entrez.dropna() # drops columns missing matching uniprot or entrez id
-    return swiss_entrez_drop_na.to_csv(out_filename, sep='\t')
+    return swiss_entrez_drop_na.to_csv(out_filename, sep='\t', index=False)
 
 if __name__ == '__main__':
     get_swiss_entrez_conv(in_filename='HUMAN_9606_idmapping_selected.tab', out_filename='uni_entrez_conversion.csv')
