@@ -1,11 +1,10 @@
-import numpy as np
-import pandas as pd
-import re
-
 '''Script is designed to organize several functions that use RegEx to detect Biogrid IDs and Swissprot IDs in
 a psi_mitlab file from the IMEX protein-protein interaction database found at:
 http://www.ebi.ac.uk/Tools/webservices/psicquic/view/
 '''
+import numpy as np
+import pandas as pd
+import re
 
 def regex(expression, target):
     '''Basic RegEx function that takes a RegEx expression and a target string for parsing as arguments.

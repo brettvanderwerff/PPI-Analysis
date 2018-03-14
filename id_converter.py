@@ -16,17 +16,17 @@ def replace_biogrid_id(df, label):
             df[label] = df[label].replace([item], new_id)
     return df
 
-def run(id_parsed_df):
+def run(df):
     '''Calls the replace biogrid_id function twice, once to replace the biogrid IDs for protein A and then again
     to replace the biogrid IDs for protein B.
     '''
-    update_df_A = replace_biogrid_id(df=id_parsed_df, label='Parsed A ID')
+    update_df_A = replace_biogrid_id(df=df, label='Parsed A ID')
     update_df_B = replace_biogrid_id(df=update_df_A, label='Parsed B ID')
     return update_df_B
 
 if __name__ == '__main__':
     id_parsed_df = id_parser.run(filename='clusteredQuery_MST1R.txt')
-    print(run(id_parsed_df=id_parsed_df))
+    print(run(df=id_parsed_df))
 
 
 
