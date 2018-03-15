@@ -8,6 +8,31 @@ import numpy as np
 import pandas as pd
 import swiss_gene_name_conv
 
+def eliminate_duplicate_genes(df):
+    '''Function will group together columns that describe the same gene(i.e. multiple databases have entries describing
+    the same gene. This function is not complete yet.
+    '''
+    df_sort = df.groupby('Interactor Column').agg({'Publication Identifier(s)': lambda x: '|'.join(set(x)).upper(),
+                                                   'Interaction identifier(s)': lambda x: '|'.join(set(x)),
+                                                   '#ID(s) interactor A': lambda x: '|'.join(set(x)),
+                                                   'ID(s) interactor B': lambda x: '|'.join(set(x)),
+                                                   'Alt. ID(s) interactor A': 'first',
+                                                   'Alt. ID(s) interactor B': 'first',
+                                                   'Alias(es) interactor A': 'first',
+                                                   'Alias(es) interactor B': 'first',
+                                                   'Interaction detection method(s)': lambda x: '|'.join(set(x)),
+                                                   'Publication 1st author(s)': lambda x: '|'.join(set(x)).upper(),
+                                                   'Taxid interactor A': 'first',
+                                                   'Taxid interactor B': 'first',
+                                                   'Interaction type(s)': lambda x: '|'.join(set(x)),
+                                                   'Source database(s)': lambda x: '|'.join(set(x)),
+                                                   'Confidence value(s)': lambda x: '|'.join(set(x)),
+                                                   'Parsed A ID': 'first',
+                                                   'Parsed B ID': 'first',
+                                                   'Parsed A ID gene name': 'first',
+                                                   'Parsed B ID gene name': 'first'}).reset_index()
+    return df_sort
+
 def remove_redundant_entries(df):
     '''Function will leverage the IDs in the 'Interaction identifier(s)' column to detect entries that
     are redundant across databases. Function will replace rows that contain
@@ -72,12 +97,14 @@ def publication_compare(df):
     return pd.concat([pd.DataFrame(new_list, columns=['Publication Identifier(s)']),
                       df.drop(columns=['Publication Identifier(s)'])], axis=1)
 
+
 def remove_empty(df):
     '''Will remove entire columns that contain an empty gene name or any other empty value (NaN)
      in it's rows. Empty gene names are produced from
     non-human interactions, chemicals, RNAs, or anything else that does not map to a uniprot ID.
     '''
     return df.dropna(axis=0).reset_index(drop=True)
+
 
 def run(df):
     '''Calls all functions in script in order.
