@@ -22,6 +22,19 @@ def find_gene_name(df, label):
             gene_name_list.append(np.nan)
     return pd.DataFrame(gene_name_list, columns=[label + ' gene name'])
 
+def interactor_column(df):
+    '''Generates a column that specifies only the interactors of the query protein.
+    '''
+    df['Interactor Column'] = np.where(df['Parsed A ID gene name'] != 'MST1R',
+                                                    df['Parsed A ID gene name'], np.nan)
+    df['Interactor Column'] = np.where(df['Parsed B ID gene name'] != 'MST1R',
+                                                    df['Parsed B ID gene name'],
+                                                    df['Interactor Column'])
+    df['Interactor Column'] = np.where(
+        (df['Parsed A ID gene name'] == 'MST1R') & (df['Parsed B ID gene name'] == 'MST1R'),
+        df['Parsed A ID gene name'], df['Interactor Column'])
+    return df
+
 def run(df):
     '''Calls the find_gene_name function once to convert protein A swissprot ID to common gene names and again to
      convert protein B swissprot ID to common gene names and returns a concatenated dataframe with the newly added
@@ -29,9 +42,10 @@ def run(df):
     '''
     gene_names_A = find_gene_name(df=df, label='Parsed A ID')
     gene_names_B = find_gene_name(df=df, label='Parsed B ID')
-    return pd.concat([df, gene_names_A, gene_names_B], axis=1)
+    concat_gene_names = pd.concat([df, gene_names_A, gene_names_B], axis=1)
+    return interactor_column(df=concat_gene_names)
 
 if __name__ == '__main__':
     id_parsed_df = id_parser.run(filename='clusteredQuery_MST1R.txt')
     id_converted_df = id_converter.run(df=id_parsed_df)
-    run(df=id_converted_df)
+    print(run(df=id_converted_df))
