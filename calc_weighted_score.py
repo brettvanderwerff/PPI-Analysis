@@ -4,66 +4,87 @@
 import clean_file
 import id_converter
 import id_parser
-import pandas as pd
 import swiss_gene_name_conv
+import pandas as pd
+import numpy as np
 
 def publication_score(df):
-    '''Calculates the publication score by counting how many publications are attributed to each interaction.
+    '''Counts the number of publications in the 'Publication Identifier(s)' column.
     '''
-    auth_row_list = []
-    ps = []
-    for item in df['Publication 1st author(s)']: #might want to convert list to sets
-        auth_row_list.append(item.upper().split('|'))
-    for item in auth_row_list:
-        ps.append(len(item))
-    return pd.concat([pd.DataFrame(ps, columns=['Publication Score']), df], axis=1)
+    df['Publication Score'] = df['Publication Identifier(s)'].str.split('|').apply(lambda x: len(x))
+    return df
 
-def pool_methods(df):
-    '''Pools together method codes that reflect highly similar methods., results from this column are used to calculate
-    the method score.
-    '''
-    method_dict = pd.read_csv('method_dict.txt', delimiter='\t', dtype=str)
-    new_list = []
-    method_list = []
-    pooled_list = []
-    for item in df['Interaction detection method(s)']:
-        method_list.append(item.upper().split('|'))
-    for item in method_list:
-        row_list = []
-        for element in item:
-            method = method_dict.loc[method_dict['Code'] == str(element[8:15])]['ID'].iloc[0]
-            if method not in row_list:
-                row_list.append(method)
-        new_list.append(row_list)
-    sep = '|'
-    for item in new_list:
-        try:
-            pooled_list.append(sep.join(item))
-        except TypeError:
-            pooled_list.append(item)
-    return pd.concat([pd.DataFrame(pooled_list, columns=['Pooled Methods']), df], axis=1) # need to handle unspecified methods somehow
 
 def method_score(df):
-    '''Calculates the method score by counting how many different pooled methods were used for each interaction.
+    '''Counts the methods of publications in the 'Pooled Methods' column.
     '''
-    method_list = []
-    count = []
-    for item in df['Pooled Methods']:
-        method_list.append(item.upper().split('|'))
-    for item in method_list:
-        count.append(len(item))
-    return pd.concat([pd.DataFrame(count, columns=['Method Score']), df], axis=1)
+    df['Method Score'] = df['Pooled Methods'].str.split('|').apply(lambda x: len(x))
+    return df
+
+def crapome_score_apply(row, human_matrix):
+    '''Argument for the apply method in the crapome_score function. Gives the crapome score based on how often the
+    protein shows up in APMS experiments and how many different methods besides APMS were used to detect the
+    interaction.
+    '''
+    matrix = human_matrix.loc[human_matrix['Gene'] == row['Interactor name']].as_matrix()
+    method_list =[]
+    try:
+        method_list.append(row['Pooled Methods'].str.split('|'))
+    except:
+        method_list.append(row['Pooled Methods'])
+    try:
+        crapome_ratio = np.count_nonzero(matrix[0][3:]) / len(matrix[0][3:])
+    except IndexError:
+        crapome_ratio = 0
+    if 'APMS' in method_list and len(method_list) == 1 and crapome_ratio > .5:
+        crapome_score = -1
+    elif 'APMS' in method_list and len(method_list) == 2 and crapome_ratio > .5:
+        crapome_score = -.5
+    elif 'APMS' in method_list and len(method_list) > 3 and crapome_ratio > .5:
+        crapome_score = 0
+    elif 'APMS' in method_list and len(method_list) ==1 and crapome_ratio > .3 and crapome_ratio <.5:
+        crapome_score = -.5
+    else:
+        crapome_score = 0
+    return crapome_score
+
+def crapome_score(df):
+    '''Calculates the crapome score by calling the crapome_score_apply function.
+    '''
+    human_matrix = pd.read_csv('CRAPome files/CRAPome database (H. sapiens) V 1.1 ( matrix format ).txt',
+                               delimiter='\t')
+    df['Crapome Score'] = df.apply(crapome_score_apply, human_matrix=human_matrix, axis=1)
+    return df
+
+def weighted_score(df):
+    '''Calculates weighted protein protein interaction score by summing the publication score, method score,
+    and crapome score.
+    '''
+    df['Weighted_score'] = df['Publication Score'] + df['Method Score'] + df['Crapome Score']
+    return df
+
+def write_results(df):
+    '''Removes entries from dataframe that have a weighted score of 2 or less as determined by the weighted_score
+    function.
+    '''
+    df['Publication Identifier(s)'] = np.where((df['Weighted_score'] > 2), df['Publication Identifier(s)'], np.nan)
+    return df.dropna(axis=0).reset_index(drop=True)
 
 def run(df):
     '''Calls all functions in script in order.
     '''
-    scored_pub = publication_score(df)
-    pooled_meth = pool_methods(scored_pub)
-    return method_score(pooled_meth)
+    pub_score = publication_score(df=df)
+    scored_method = method_score(df=pub_score)
+    scored_crapome = crapome_score(df=scored_method)
+    final_score = weighted_score(df=scored_crapome)
+    return write_results(df=final_score)
 
 if __name__ == '__main__':
     id_parsed_df = id_parser.run(filename='clusteredQuery_MST1R.txt')
     id_converted_df = id_converter.run(df=id_parsed_df)
-    gene_name_conv_df = swiss_gene_name_conv.run(df=id_converted_df)
+    gene_name_conv_df = swiss_gene_name_conv.run(df=id_converted_df, query_gene_name='MST1R')
     cleaned_file_df = clean_file.run(df=gene_name_conv_df)
     print(run(df=cleaned_file_df))
+
+
+
