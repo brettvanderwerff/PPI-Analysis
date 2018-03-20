@@ -1,67 +1,53 @@
-'''Script is designed to organize several functions that use RegEx to detect Biogrid IDs and Swissprot IDs in
+'''Script is designed to  use RegEx to detect Biogrid IDs and UniProtKB IDs in
 a psi_mitlab file from the IMEX protein-protein interaction database found at:
 http://www.ebi.ac.uk/Tools/webservices/psicquic/view/
+This program focuses on psi-mitlab files produced from interrogating Biogrid, Innate DB, MINT, and IntAct databases
+with the psicquic tool.
 '''
 import numpy as np
 import pandas as pd
-import re
+import warnings
 
-def regex(expression, target):
-    '''Basic RegEx function that takes a RegEx expression and a target string for parsing as arguments.
-    '''
-    id_regex = re.compile(expression)
-    mo = id_regex.search(target)
-    return mo.group()
+warnings.simplefilter(action='ignore', category=FutureWarning) #Silences future warning
 
-def get_id(psi_mitlab, column, alias_column, protein_label):
-    '''Gets swissprot, biogrid, entrez ids from a psi_mitlab file. The search prioritizes swissprot and biogrid IDs
-    because unlike entrez IDs, swissprot and biogrid IDs usually reference one protein.
-    '''
-    swissprot_expression = '[OPQ][0-9][A-Z0-9]{3}[0-9]|[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2}'
-    biogrid_expression = r'biogrid:(\d\d\d\d\d\d)'
-    enterez_expression = r'entrez gene/locuslink:(\d)+'
-    id_list = []
-    for counter, item in enumerate(psi_mitlab[column], 0):
-        try:
-            id_list.append((regex(expression=biogrid_expression,
-                           target=item))[8:])
-        except AttributeError:
-            try:
-                id_list.append(regex(expression=swissprot_expression,
-                               target=item))
-            except AttributeError:
-                try:
-                    id_list.append(
-                        regex(expression=swissprot_expression, target=psi_mitlab[alias_column][counter]))
-                except AttributeError:
-                    try:
-                        id_list.append(
-                            (regex(expression=enterez_expression, target=psi_mitlab[alias_column][counter]))[
-                            22:])
-                    except AttributeError:
-                        id_list.append(np.nan)
-    return pd.DataFrame(id_list, columns=[protein_label])
-
-def combine_dfs(psi_mitlab, protein_A_ID, protein_B_ID):
-    '''Combines dataframes with extracted labels for protein A and protein B (protein_A_ID and protein_b_ID) with the
-    psi_mitlab dataframe.
-    '''
-    return pd.concat([psi_mitlab, protein_A_ID, protein_B_ID], axis=1)
+def get_id(df):
+    '''Searches the dataframe for Biogrid IDs and UniProtKB IDs. The Innate DB, MINT, and IntAct databases seem to
+     typically have UniProtKB IDs in either the 'ID(s) interactor' column or the 'Alias(es) interactor' column.
+      Biogrid IDs can be mapped to a single UniProtKB ID using a dictionary from the biogrid website. This
+      conversion will take place in a later function.
+      '''
+    df['Parsed A ID'] = df['#ID(s) interactor A'].str.extract(r'biogrid:(\d{6})')
+    df['Parsed A ID'] = np.where(
+        df['Parsed A ID'].isnull(),
+        df['#ID(s) interactor A'].str.extract('([OPQ][0-9][A-Z0-9]{3}[0-9]|[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2})')[
+            0],
+        df['Parsed A ID'])
+    df['Parsed A ID'] = np.where(df['Parsed A ID'].isnull(),
+                                 df['Alias(es) interactor A'].str.extract(
+                                     '([OPQ][0-9][A-Z0-9]{3}[0-9]|[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2})')[0],
+                                 df['Parsed A ID'])
+    df['Parsed B ID'] = df['ID(s) interactor B'].str.extract(r'biogrid:(\d{6})')
+    df['Parsed B ID'] = np.where(df['Parsed B ID'].isnull(),
+        df['ID(s) interactor B'].str.extract('([OPQ][0-9][A-Z0-9]{3}[0-9]|[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2})')[
+            0],
+        df['Parsed B ID'])
+    df['Parsed B ID'] = np.where(df['Parsed B ID'].isnull(),
+                                 df['Alias(es) interactor B'].str.extract(
+                                     '([OPQ][0-9][A-Z0-9]{3}[0-9]|[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2})')[0],
+                                 df['Parsed B ID'])
+    return df
 
 def run(filename):
-    '''Run function invokes all other functions in this script in the correct order. Accepts the filename of a
-    psi_mitlab file as an argument.
+    '''Runs the script.
     '''
-    psi_mitlab = pd.read_csv(filename, delimiter='\t')
-    protein_A_ID = get_id(psi_mitlab=psi_mitlab, column='#ID(s) interactor A',
-                          alias_column='Alias(es) interactor A', protein_label='Parsed A ID')
-    protein_B_ID = get_id(psi_mitlab=psi_mitlab, column='ID(s) interactor B',
-                          alias_column='Alias(es) interactor B', protein_label='Parsed B ID')
-    return combine_dfs(psi_mitlab=psi_mitlab, protein_A_ID=protein_A_ID,
-                       protein_B_ID=protein_B_ID)
+    df = pd.read_csv(filename, delimiter='\t')
+    return get_id(df=df)
+
 
 if __name__ == '__main__':
     print(run(filename='clusteredQuery_MST1R.txt'))
+
+
 
 
 
