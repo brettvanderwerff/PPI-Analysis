@@ -1,21 +1,26 @@
-'''Script cleans the dataframe returned by the swiss_gene_name_conv script to remove non-human interactions,
-chemicals, RNAs, unspecified methods, and redundant entries.
+'''Script cleans the dataframe returned by the swiss_gene_name_conv script to remove unspecified methods, unassigned
+pubmed entries, redundant entries etc.
 '''
 import id_converter
 import id_parser
 import numpy as np
+import pandas as pd
 import swiss_gene_name_conv
-import  pandas as pd
 
-def pool_methods_apply(list, method_dict):
-    '''Argument for the apply method in the pool methods function. This function groups similar methods together.
+def pool_methods_apply(list):
+    '''Argument for the series method 'apply' in the pool_methods function. This function groups similar methods
+    together under 'umbrella' terms. Adds NaN for interactions gotten from unspecified and unknown methods.
     '''
+    method_dict = pd.read_csv('method_dict.txt', delimiter='\t', dtype=str)
     method_list = []
     for item in list:
         if 'unknown' in item:
             method_list = [np.nan]
             break
-        method = method_dict.loc[method_dict['Code'] == str(item[8:15])]['ID'].iloc[0] #there is probably a newer method that is not in the dictionary if get an error here
+        method = method_dict.loc[method_dict['Code'] == str(item[8:15])]['ID'].iloc[0]
+        #there is probably a newer method that is not in the dictionary if an error is traced to this above line.
+        #this is easily fixed by printing the above method and catching the methods that throw the error and updating
+        #the method_dict.txt file to include those error throwing methods
         if method == 'UNSPM':
             method_list = [np.nan]
             break
@@ -24,24 +29,23 @@ def pool_methods_apply(list, method_dict):
     return '|'.join(method_list) if len(method_list) > 1 else method_list[0]
 
 
-def pool_methods(df): # need to handle unspecified methods somehow
-    '''Applies the pool_methods_apply function to the 'Interaction detection method(s)' column of the dataframe. Also
-    deletes interactions gotten from unspecified and unknown methods.
+def pool_methods(df):
+    '''Applies the pool_methods_apply function to the 'Interaction detection method(s)' column of the dataframe.
+    Deletes interactions gotten from unspecified and unknown methods.
     '''
-    method_dict = pd.read_csv('method_dict.txt', delimiter='\t', dtype=str)
-    df['Pooled Methods'] = df['Interaction detection method(s)'].str.split('|').apply(pool_methods_apply, method_dict=method_dict)
+    df['Pooled Methods'] = df['Interaction detection method(s)'].str.split('|').apply(pool_methods_apply)
     return df.dropna(axis=0).reset_index(drop=True)
 
-
 def filter_pubmed_ID_apply(list):
-    '''Function filters the publication IDs present in the 'Publication Identifier(s)' column to save only pubmed ID's
-    that are unambiguously assigned. This function is meant to be used via the apply method of a series.
+    '''Function filters the pubmed IDs present in the 'Publication Identifier(s)' column to save only pubmed ID's
+    that are unambiguously assigned. Places NaN in columns that have unassigned pubmed IDs.
+    This function is meant to be used via the apply method of a series.
     '''
     pubmed_only = []
     for item in list:
         if 'PUBMED:UNASSIGNED' in item.upper():
             pubmed_only = [np.nan]
-            break #cannot join np.nan with other pubmed values
+            break
         elif 'PUBMED' in item.upper():
             pubmed_only.append(item.upper())
     return ('|').join(set(pubmed_only)) if len(pubmed_only) > 1 else pubmed_only[0]
@@ -64,16 +68,16 @@ def publication_compare(df):
 
 def eliminate_duplicate_genes(df):
     '''Function will group together columns that describe the same gene(i.e. multiple databases have entries describing
-    the same gene.
+    the same gene.)
     '''
     df_sort = df.groupby('Interactor name').agg({'Publication Identifier(s)': lambda x : '|'.join(set([z.upper() for y in x for z in y.split('|')])),
                                                    'Interaction identifier(s)': lambda x : '|'.join(set([z.upper() for y in x for z in y.split('|')])),
                                                    '#ID(s) interactor A': lambda x : '|'.join(set([z.upper() for y in x for z in y.split('|')])),
                                                    'ID(s) interactor B': lambda x : '|'.join(set([z.upper() for y in x for z in y.split('|')])),
-                                                   'Alt. ID(s) interactor A': 'first',
-                                                   'Alt. ID(s) interactor B': 'first',
-                                                   'Alias(es) interactor A': 'first',
-                                                   'Alias(es) interactor B': 'first',
+                                                   'Alt. ID(s) interactor A': lambda x : '|'.join(set([z.upper() for y in x for z in y.split('|')])),
+                                                   'Alt. ID(s) interactor B': lambda x : '|'.join(set([z.upper() for y in x for z in y.split('|')])),
+                                                   'Alias(es) interactor A': lambda x : '|'.join(set([z.upper() for y in x for z in y.split('|')])),
+                                                   'Alias(es) interactor B': lambda x : '|'.join(set([z.upper() for y in x for z in y.split('|')])),
                                                    'Interaction detection method(s)': lambda x : '|'.join(set([z.upper() for y in x for z in y.split('|')])),
                                                    'Publication 1st author(s)': lambda x : '|'.join(set([z.upper() for y in x for z in y.split('|')])),
                                                    'Taxid interactor A': 'first',
@@ -101,4 +105,4 @@ if __name__ == '__main__':
     id_parsed_df = id_parser.run(filename='clusteredQuery_MST1R.txt')
     id_converted_df = id_converter.run(df=id_parsed_df)
     gene_name_conv_df = swiss_gene_name_conv.run(df=id_converted_df, query_gene_name='MST1R')
-    run(df=gene_name_conv_df)
+    print(run(df=gene_name_conv_df))

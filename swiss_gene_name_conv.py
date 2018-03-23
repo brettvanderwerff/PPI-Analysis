@@ -1,5 +1,5 @@
 '''
-Script locates common gene names for swissprot IDs in a dataframe returned from the id_converter script. The dictionary
+Script locates common gene names for UniProtKB IDs in a dataframe returned from the id_converter script. The dictionary
 referenced is 'HUMAN_9606_idmapping.dat' downloaded from:
 ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/idmapping/
 '''
@@ -9,8 +9,8 @@ import numpy as np
 import pandas as pd
 
 def find_gene_name(df, label):
-    '''Finds the corresponding common gene name for each human swissprot ID in the df returned by the run function
-    of id_converter.
+    '''Finds the corresponding common gene name for each human UniProtKB ID in the df returned by the run function
+    of id_converter. If gene name is not found then it is likely a not human or not a protein.
     '''
     gene_name_reader = pd.read_csv('HUMAN_9606_idmapping.dat', delimiter="\t", header=None)
     gene_name_only_df = gene_name_reader.loc[gene_name_reader[1] == 'Gene_Name']
@@ -23,7 +23,8 @@ def find_gene_name(df, label):
     return pd.DataFrame(gene_name_list, columns=[label + ' gene name'])
 
 def interactor_column(df, query_gene_name):
-    '''Generates a column that specifies only the interactors of the query protein.
+    '''Generates a column that specifies only the interactors of the query protein. i.e. if the query protein is
+    MST1R and the interactor is MAPK, the MAPK would populate the "Interactor Name' column.
     '''
     df['Interactor name'] = np.where(df['Parsed A gene name'] != query_gene_name,
                                                     df['Parsed A gene name'], np.nan)
@@ -36,16 +37,20 @@ def interactor_column(df, query_gene_name):
     return df
 
 def run(df, query_gene_name):
-    '''Calls the find_gene_name function once to convert protein A swissprot ID to common gene names and again to
-     convert protein B swissprot ID to common gene names and returns a concatenated dataframe with the newly added
-    gene names.
+    '''Calls the find_gene_name function once to create a dataframe of common gene names of protein A and again to
+    create a dataframe for the common gene names of protein B. These dataframes are then concatenated with the dataframe
+    returned by the id_converter module run function. An 'Interactor name' column is then generated for the dataframe
+     with the interactor_column function. NaN values are dropped from the returned function, which will mostly be
+     interactors that are not proteins or not human proteins.
     '''
-    gene_names_A = find_gene_name(df=df, label='Parsed A')
-    gene_names_B = find_gene_name(df=df, label='Parsed B')
-    concat_gene_names = pd.concat([df, gene_names_A, gene_names_B], axis=1)
-    return interactor_column(df=concat_gene_names, query_gene_name=query_gene_name).dropna(axis=0).reset_index(drop=True)
+    gene_name_a_df = find_gene_name(df=df, label='Parsed A')
+    gene_name_b_df = find_gene_name(df=df, label='Parsed B')
+    concat_dfs = pd.concat([df, gene_name_a_df, gene_name_b_df], axis=1)
+    return interactor_column(df=concat_dfs, query_gene_name=query_gene_name).dropna(axis=0).reset_index(drop=True)
 
 if __name__ == '__main__':
     id_parsed_df = id_parser.run(filename='clusteredQuery_MST1R.txt')
     id_converted_df = id_converter.run(df=id_parsed_df)
     print(run(df=id_converted_df, query_gene_name='MST1R'))
+
+

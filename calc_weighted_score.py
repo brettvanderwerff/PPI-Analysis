@@ -1,32 +1,32 @@
 '''Script calculates the weighted protein-protein interaction score.
 '''
-
 import clean_file
 import id_converter
 import id_parser
-import swiss_gene_name_conv
-import pandas as pd
 import numpy as np
+import pandas as pd
+import swiss_gene_name_conv
 
 def publication_score(df):
-    '''Counts the number of publications in the 'Publication Identifier(s)' column.
+    '''Counts the number of publications in the 'Publication Identifier(s)' column to get the 'publication score'
     '''
     df['Publication Score'] = df['Publication Identifier(s)'].str.split('|').apply(lambda x: len(x))
     return df
 
-
 def method_score(df):
-    '''Counts the methods of publications in the 'Pooled Methods' column.
+    '''Counts the number of methods in the 'Pooled Methods' column to get the 'methods score'
     '''
     df['Method Score'] = df['Pooled Methods'].str.split('|').apply(lambda x: len(x))
     return df
 
-def crapome_score_apply(row, human_matrix):
-    '''Argument for the apply method in the crapome_score function. Gives the crapome score based on how often the
-    protein shows up in APMS experiments and how many different methods besides APMS were used to detect the
-    interaction.
+def crapome_score_apply(row):
+    '''Argument for the series 'apply' method in the crapome_score function. Gives the 'crapome score' based on how
+    often the protein shows up in APMS experiments as determined by records downloaded from 'http://crapome.org/'
+    Also factors in how many different methods besides APMS were used to detect the interaction.
     '''
-    matrix = human_matrix.loc[human_matrix['Gene'] == row['Interactor name']].as_matrix()
+    crapome_df = pd.read_csv('CRAPome files/CRAPome database (H. sapiens) V 1.1 ( matrix format ).txt',
+                               delimiter='\t')
+    matrix = crapome_df.loc[crapome_df['Gene'] == row['Interactor name']].as_matrix()
     method_list =[]
     try:
         method_list.append(row['Pooled Methods'].str.split('|'))
@@ -49,16 +49,14 @@ def crapome_score_apply(row, human_matrix):
     return crapome_score
 
 def crapome_score(df):
-    '''Calculates the crapome score by calling the crapome_score_apply function.
+    '''Calculates the 'crapome score' by calling the crapome_score_apply function.
     '''
-    human_matrix = pd.read_csv('CRAPome files/CRAPome database (H. sapiens) V 1.1 ( matrix format ).txt',
-                               delimiter='\t')
-    df['Crapome Score'] = df.apply(crapome_score_apply, human_matrix=human_matrix, axis=1)
+    df['Crapome Score'] = df.apply(crapome_score_apply, axis=1)
     return df
 
 def weighted_score(df):
-    '''Calculates weighted protein protein interaction score by summing the publication score, method score,
-    and crapome score.
+    '''Calculates weighted protein protein interaction score by summing the publication, method,
+    and crapome scores.
     '''
     df['Weighted_score'] = df['Publication Score'] + df['Method Score'] + df['Crapome Score']
     return df
@@ -73,8 +71,8 @@ def write_results(df):
 def run(df):
     '''Calls all functions in script in order.
     '''
-    pub_score = publication_score(df=df)
-    scored_method = method_score(df=pub_score)
+    scored_pub = publication_score(df=df)
+    scored_method = method_score(df=scored_pub)
     scored_crapome = crapome_score(df=scored_method)
     final_score = weighted_score(df=scored_crapome)
     return write_results(df=final_score)
