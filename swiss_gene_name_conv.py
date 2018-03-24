@@ -42,9 +42,14 @@ def run(df, query_gene_name):
      dataframe with the interactor_column function. NaN values are dropped from the returned function, which will
       mostly be interactors that are not proteins or not human proteins.
     '''
+    print('Generating common gene names...')
     gene_name_a_df = find_gene_name(df=df, label='Parsed A')
     gene_name_b_df = find_gene_name(df=gene_name_a_df, label='Parsed B')
-    return interactor_column(df=gene_name_b_df, query_gene_name=query_gene_name).dropna(axis=0).reset_index(drop=True)
+    print('Common gene names generated')
+    print('Generating Interactor column...')
+    interactor_column_df = interactor_column(df=gene_name_b_df, query_gene_name=query_gene_name).dropna(axis=0).reset_index(drop=True)
+    print('Interactor column generated')
+    return interactor_column_df
 
 if __name__ == '__main__':
     id_parsed_df = id_parser.run(filename='clusteredQuery_MST1R.txt')

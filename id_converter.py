@@ -22,8 +22,11 @@ def run(df):
     '''Calls the replace biogrid_id function twice, once to replace the biogrid IDs for protein A and then again
     to replace the biogrid IDs for protein B.
     '''
+    print('Converting Biogrid IDs to UniProtKB IDs...')
     update_df_A = replace_biogrid_id(df=df, label='Parsed A ID')
-    return replace_biogrid_id(df=update_df_A, label='Parsed B ID')
+    update_df_B = replace_biogrid_id(df=update_df_A, label='Parsed B ID')
+    print('Biogrid IDs converted')
+    return update_df_B
 
 if __name__ == '__main__':
     id_parsed_df = id_parser.run(filename='clusteredQuery_MST1R.txt')

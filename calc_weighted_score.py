@@ -71,10 +71,12 @@ def write_results(df):
 def run(df):
     '''Calls all functions in script in order.
     '''
+    print('Calculating weighted score...')
     scored_pub = publication_score(df=df)
     scored_method = method_score(df=scored_pub)
     scored_crapome = crapome_score(df=scored_method)
     final_score = weighted_score(df=scored_crapome)
+    print('Weighted score calculated, now writing results')
     return write_results(df=final_score)
 
 if __name__ == '__main__':

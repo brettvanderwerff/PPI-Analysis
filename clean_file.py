@@ -95,10 +95,17 @@ def eliminate_duplicate_genes(df):
 def run(df):
     '''Calls all functions in script in order.
     '''
+    print('Pooling methods...')
     pooled_methods = pool_methods(df=df)
+    print('Methods pooled')
+    print('Filtering Pubmed entries...')
     join_pubmed = filter_pubmed_ID(df=pooled_methods)
     pub_compared = publication_compare(df=join_pubmed)
-    return eliminate_duplicate_genes(df=pub_compared)
+    print('Pubmed entries filtered')
+    print('Removing redundant entries...')
+    dup_genes_eliminated = eliminate_duplicate_genes(df=pub_compared)
+    print('Redundant entries removed')
+    return dup_genes_eliminated
 
 if __name__ == '__main__':
     id_parsed_df = id_parser.run(filename='clusteredQuery_MST1R.txt')

@@ -40,8 +40,11 @@ def get_id(df):
 def run(filename):
     '''Runs the script.
     '''
+    print('Parsing IDs...')
     df = pd.read_csv(filename, delimiter='\t')
-    return get_id(df=df)
+    parsed_df = get_id(df=df)
+    print('IDs parsed')
+    return parsed_df
 
 
 if __name__ == '__main__':
