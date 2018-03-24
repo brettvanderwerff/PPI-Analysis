@@ -4,9 +4,8 @@ import os.path
 def check_install():
     ''' Checks if 'biogrid_swiss_conversion.csv' is installed to the directory, returns True if it is.
     '''
-    print('checking if biogrid_swiss_conversion.csv is installed.')
+    print('Checking if biogrid_swiss_conversion.csv is installed...')
     return True if os.path.isfile('biogrid_swiss_conversion.csv') else False
-
 
 def get_biogrid_swiss_id_conv(in_filename, out_filename):
     '''Processes Biogrid ID mapping file 'BIOGRID-IDENTIFIERS-3.4.158.tab.txt' gotten from:
@@ -29,6 +28,7 @@ def run():
         print('Installing Biogrid swissprot conversion file, this will take several minutes...')
         get_biogrid_swiss_id_conv(in_filename='BIOGRID-IDENTIFIERS-3.4.158.tab.txt',
                                   out_filename='biogrid_swiss_conversion.csv')
+        print('Biogrid swissprot conversion file is now installed')
 
 if __name__ ==  '__main__':
     run()
