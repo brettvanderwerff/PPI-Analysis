@@ -21,8 +21,11 @@ def method_score(df):
 
 def crapome_score_apply(row):
     '''Argument for the series 'apply' method in the crapome_score function. Gives the 'crapome score' based on how
-    often the protein shows up in APMS experiments as determined by records downloaded from 'http://crapome.org/'
-    Also factors in how many different methods besides APMS were used to detect the interaction.
+    often the protein shows up in APMS experiments as determined by records downloaded from
+    'http://crapome.org/?q=Download' in the form of the file:
+     'CRAPome database (H. sapiens) V 1.1 ( matrix format ).txt'
+     Also factors in how many different methods besides APMS were used to detect the
+     interaction.
     '''
     crapome_df = pd.read_csv('CRAPome files/CRAPome database (H. sapiens) V 1.1 ( matrix format ).txt',
                                delimiter='\t')
