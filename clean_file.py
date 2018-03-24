@@ -28,7 +28,6 @@ def pool_methods_apply(list):
             method_list.append(method)
     return '|'.join(method_list) if len(method_list) > 1 else method_list[0]
 
-
 def pool_methods(df):
     '''Applies the pool_methods_apply function to the 'Interaction detection method(s)' column of the dataframe.
     Deletes interactions gotten from unspecified and unknown methods.
