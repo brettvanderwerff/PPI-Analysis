@@ -13,10 +13,11 @@ numpy==1.13.3
 pandas==0.22.0
 
 Biogrid ID mapping file 'BIOGRID-IDENTIFIERS-3.4.158.tab.txt' gotten from: https://downloads.thebiogrid.org/BioGRID/Release-Archive/BIOGRID-3.4.158/
+Place this file in a folder called 'ID_conversion_files' in the main directory
 
 'HUMAN_9606_idmapping.dat' downloaded from:
 ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/idmapping/
-Place this file in the main directory
+Place this file in a folder called 'ID_conversion_files' in the main directory
 
 'CRAPome database (H. sapiens) V 1.1 ( matrix format ).txt' downloaded from:
 'http://crapome.org/?q=Download'. Place this file in a folder called 'CRAPome files' in the main directory.
