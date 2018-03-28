@@ -5,7 +5,7 @@ def get_swiss_entrez_conv(in_filename, out_filename):
     ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/idmapping/
     to obtain a csv for cross-referencing  uniprot and entrez ids.
     '''
-    read_file = pd.read_csv(in_filename, delimiter='\t', header=None, dtype=str)
+    read_file = pd.read_csv(('ID_conversion_files/' + in_filename), delimiter='\t', header=None, dtype=str)
     swiss_entrez = read_file[[0,2]] #only grab uniprot and entrez id columns
     swiss_entrez.columns = ['uniprot_id', 'entrez_id']
     swiss_entrez_drop_na = swiss_entrez.dropna() # drops columns missing matching uniprot or entrez id

@@ -12,7 +12,8 @@ def find_gene_name(df, label):
     '''Finds the corresponding common gene name for each human UniProtKB ID in the df returned by the run function
     of id_converter. If gene name is not found then it is likely a not human or not a protein.
     '''
-    reader = pd.read_csv('HUMAN_9606_idmapping.dat', delimiter="\t", names=['UniProtKB_ID', 'Identifier', 'Value'])
+    reader = pd.read_csv(('ID_conversion_files/' + 'HUMAN_9606_idmapping.dat'), delimiter="\t",
+                         names=['UniProtKB_ID', 'Identifier', 'Value'])
     gene_name_df = reader.loc[reader['Identifier'] == 'Gene_Name']
     gene_name_df_dd = gene_name_df.drop_duplicates(subset='UniProtKB_ID', keep=False)
     # drop_duplicates ensures that only UniProtKB IDs that correspond to one common gene name are used
