@@ -5,7 +5,7 @@ import id_converter
 import id_parser
 import numpy as np
 import pandas as pd
-import swiss_gene_name_conv
+import uniprot_gene_name_conv
 
 def publication_score(df):
     '''Counts the number of publications in the 'Publication Identifier(s)' column to get the 'publication score'
@@ -27,7 +27,7 @@ def crapome_score_apply(row):
      Also factors in how many different methods besides APMS were used to detect the
      interaction.
     '''
-    crapome_df = pd.read_csv('CRAPome files/CRAPome database (H. sapiens) V 1.1 ( matrix format ).txt',
+    crapome_df = pd.read_csv('CRAPome_files/CRAPome database (H. sapiens) V 1.1 ( matrix format ).txt',
                                delimiter='\t')
     matrix = crapome_df.loc[crapome_df['Gene'] == row['Interactor name']].as_matrix()
     method_list =[]
@@ -79,13 +79,13 @@ def run(df):
     scored_method = method_score(df=scored_pub)
     scored_crapome = crapome_score(df=scored_method)
     final_score = weighted_score(df=scored_crapome)
-    print('Weighted score calculated, now writing results')
+    print('Weighted score calculated, now writing table that contains proteins w/ weighted score >2')
     return write_results(df=final_score)
 
 if __name__ == '__main__':
     id_parsed_df = id_parser.run(filename='clusteredQuery_MST1R.txt')
     id_converted_df = id_converter.run(df=id_parsed_df)
-    gene_name_conv_df = swiss_gene_name_conv.run(df=id_converted_df, query_gene_name='MST1R')
+    gene_name_conv_df = uniprot_gene_name_conv.run(df=id_converted_df, query_gene_name='MST1R')
     cleaned_file_df = clean_file.run(df=gene_name_conv_df)
     print(run(df=cleaned_file_df))
 

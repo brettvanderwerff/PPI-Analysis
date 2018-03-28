@@ -1,11 +1,11 @@
-'''Script cleans the dataframe returned by the swiss_gene_name_conv script to remove unspecified methods, unassigned
+'''Script cleans the dataframe returned by the uniprot_gene_name_conv script to remove unspecified methods, unassigned
 pubmed entries, redundant entries etc.
 '''
 import id_converter
 import id_parser
 import numpy as np
 import pandas as pd
-import swiss_gene_name_conv
+import uniprot_gene_name_conv
 
 def pool_methods_apply(list):
     '''Argument for the series method 'apply' in the pool_methods function. This function groups similar methods
@@ -106,9 +106,10 @@ def run(df):
     dup_genes_eliminated = eliminate_duplicate_genes(df=pub_compared)
     print('Redundant entries removed')
     return dup_genes_eliminated
+# note: code needs to be included to drop UBC proteins if desired
 
 if __name__ == '__main__':
     id_parsed_df = id_parser.run(filename='clusteredQuery_MST1R.txt')
     id_converted_df = id_converter.run(df=id_parsed_df)
-    gene_name_conv_df = swiss_gene_name_conv.run(df=id_converted_df, query_gene_name='MST1R')
+    gene_name_conv_df = uniprot_gene_name_conv.run(df=id_converted_df, query_gene_name='MST1R')
     print(run(df=gene_name_conv_df))
