@@ -1,0 +1,5 @@
+In this file place:
+
+Biogrid ID mapping file 'BIOGRID-IDENTIFIERS-3.4.158.tab.txt' gotten from: https://downloads.thebiogrid.org/BioGRID/Release-Archive/BIOGRID-3.4.158/
+
+'HUMAN_9606_idmapping.dat' gotten from: 'ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/idmapping/'
