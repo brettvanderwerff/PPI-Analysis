@@ -25,6 +25,8 @@ pandas==0.22.0
 A psit-mitlab file of your favorite protein gotten from searching for your favorite protein on 
 http://www.ebi.ac.uk/Tools/webservices/psicquic/view/ and selecting Biogrid, Innate DB, MINT, and IntAct databases. Place this file in the main directory. This program was tailored to work with results from these databases specifically, but likely will work with any database that uses UniProtKB IDs/Biodgrid IDs to annotate protein interactions. The repo contains an example of this file labeled as 'clusteredQuery__MST1R.txt'
 
+**Note: names of files placed in the 'ID_conversion_files' and 'CRAPome files' folders must match those given above.
+
 ~~~~~~~~~~~~~~~~~~~~~~~
 How to run this program:
 ~~~~~~~~~~~~~~~~~~~~~~~
