@@ -13,8 +13,8 @@ warnings.simplefilter(action='ignore', category=FutureWarning) #Silences future 
 def get_id(df):
     '''Searches the dataframe for Biogrid IDs and UniProtKB IDs. The Innate DB, MINT, and IntAct databases seem to
      typically have UniProtKB IDs in either the 'ID(s) interactor' column or the 'Alias(es) interactor' column.
-      Biogrid IDs can be mapped to a single UniProtKB ID using a dictionary from the biogrid website. This
-      conversion will take place in a later function.
+      Biogrid IDs can often be mapped to a single UniProtKB ID using a dictionary from the Biogrid website. Biogrid IDs
+      will eventually be converted to UniProtKB IDs using the id_converter script.
       '''
     df['Parsed A ID'] = df['#ID(s) interactor A'].str.extract(r'biogrid:(\d{6})')
     df['Parsed A ID'] = np.where(
@@ -45,7 +45,6 @@ def run(filename):
     parsed_df = get_id(df=df)
     print('IDs parsed')
     return parsed_df
-
 
 if __name__ == '__main__':
     print(run(filename='clusteredQuery_MST1R.txt'))

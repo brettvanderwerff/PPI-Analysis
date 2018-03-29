@@ -11,7 +11,7 @@ def replace_biogrid_id(df,label):
     '''
     biogrid_uniprot_conversion = pd.read_csv('ID_conversion_files/biogrid_uniprot_conversion.csv', delimiter="\t", dtype=str)
     biogrid_uniprot_conversion.drop_duplicates(subset='IDENTIFIER_VALUE', keep=False, inplace=True)
-    #drop_duplicates ensures that only Biogrid IDs that correspond to one UniProtKB ID are used
+    #drop_duplicates ensures that only Biogrid IDs that correspond to one UniProtKB ID are used.
     id_column = df[[label]]
     id_df = id_column.rename(columns={label: 'BIOGRID_ID'})
     merged = pd.merge(id_df, biogrid_uniprot_conversion, on='BIOGRID_ID', how='left')
@@ -19,8 +19,8 @@ def replace_biogrid_id(df,label):
     return df
 
 def run(df):
-    '''Calls the replace biogrid_id function twice, once to replace the biogrid IDs for protein A and then again
-    to replace the biogrid IDs for protein B.
+    '''Calls the replace Biogrid_id function twice, once to replace the Biogrid IDs for protein A and then again
+    to replace the Biogrid IDs for protein B.
     '''
     print('Converting Biogrid IDs to UniProtKB IDs...')
     update_df_A = replace_biogrid_id(df=df, label='Parsed A ID')

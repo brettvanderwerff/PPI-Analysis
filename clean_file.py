@@ -18,8 +18,8 @@ def pool_methods_apply(list):
             method_list = [np.nan]
             break
         method = method_dict.loc[method_dict['Code'] == str(item[8:15])]['ID'].iloc[0]
-        #there is probably a newer method that is not in the dictionary if an error is traced to this above line.
-        #this is easily fixed by printing the above method and catching the methods that throw the error and updating
+        #if an error is traced to the above line there is probably a newer method that is not in the method_dict.
+        #this is easily fixed by catching the methods that throw the error and updating
         #the method_dict.txt file to include those error throwing methods
         if method == 'UNSPM':
             method_list = [np.nan]
@@ -36,9 +36,9 @@ def pool_methods(df):
     return df.dropna(axis=0).reset_index(drop=True)
 
 def filter_pubmed_ID_apply(list):
-    '''Function filters the pubmed IDs present in the 'Publication Identifier(s)' column to save only pubmed ID's
-    that are unambiguously assigned. Places NaN in columns that have unassigned pubmed IDs.
-    This function is meant to be used via the apply method of a series.
+    '''Argument for the series method 'apply' in the filter_pubmed_ID function. Function filters the pubmed IDs present
+     in the 'Publication Identifier(s)' column to save only pubmed ID's that are unambiguously assigned.
+     Places NaN in columns that have unassigned pubmed IDs.
     '''
     pubmed_only = []
     for item in list:
@@ -57,7 +57,7 @@ def filter_pubmed_ID(df):
     return df.dropna(axis=0).reset_index(drop=True)
 
 def publication_compare(df):
-    '''Function compares the 'Publication Identifier(s)' and 'Publication 1st author(s)' columns of the dataframe and
+    '''Compares the 'Publication Identifier(s)' and 'Publication 1st author(s)' columns of the dataframe and
     removes any rows that have an ambiguous number of publications between these columns.
     '''
     df['Publication Identifier(s)'] = np.where(df['Publication Identifier(s)'].str.split('|').apply(lambda x: len(x))
@@ -66,8 +66,8 @@ def publication_compare(df):
     return df.dropna(axis=0).reset_index(drop=True)
 
 def eliminate_duplicate_genes(df):
-    '''Function will group together columns that describe the same gene(i.e. multiple databases have entries describing
-    the same gene.)
+    '''Function will group together rows that describe the same gene. These redundancies occur from multiple
+    databases describing interactions for the same proteins.
     '''
     df_sort = df.groupby('Interactor name').agg({'Publication Identifier(s)': lambda x : '|'.join(set([z.upper() for y in x for z in y.split('|')])),
                                                    'Interaction identifier(s)': lambda x : '|'.join(set([z.upper() for y in x for z in y.split('|')])),
@@ -106,7 +106,7 @@ def run(df):
     dup_genes_eliminated = eliminate_duplicate_genes(df=pub_compared)
     print('Redundant entries removed')
     return dup_genes_eliminated
-# note: code needs to be included to drop UBC proteins if desired
+# note: code may need to be created to drop UBC proteins if desired
 
 if __name__ == '__main__':
     id_parsed_df = id_parser.run(filename='clusteredQuery_MST1R.txt')

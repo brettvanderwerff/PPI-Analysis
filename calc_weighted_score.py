@@ -23,8 +23,8 @@ def crapome_score_apply(row):
     '''Argument for the series 'apply' method in the crapome_score function. Gives the 'crapome score' based on how
     often the protein shows up in APMS experiments as determined by records downloaded from
     'http://crapome.org/?q=Download' in the form of the file:
-     'CRAPome database (H. sapiens) V 1.1 ( matrix format ).txt'
-     Also factors in how many different methods besides APMS were used to detect the
+    'CRAPome database (H. sapiens) V 1.1 ( matrix format ).txt'
+     Also factors in how many different methods besides APMS were used to describe the
      interaction.
     '''
     crapome_df = pd.read_csv('CRAPome_files/CRAPome database (H. sapiens) V 1.1 ( matrix format ).txt',
@@ -52,21 +52,21 @@ def crapome_score_apply(row):
     return crapome_score
 
 def crapome_score(df):
-    '''Calculates the 'crapome score' by calling the crapome_score_apply function.
+    '''Calculates the 'crapome score' by applying the crapome_score_apply function.
     '''
     df['Crapome Score'] = df.apply(crapome_score_apply, axis=1)
     return df
 
 def weighted_score(df):
-    '''Calculates weighted protein protein interaction score by summing the publication, method,
+    '''Calculates the weighted protein protein interaction score by summing the publication, method,
     and crapome scores.
     '''
     df['Weighted_score'] = df['Publication Score'] + df['Method Score'] + df['Crapome Score']
     return df
 
 def write_results(df):
-    '''Removes entries from dataframe that have a weighted score of 2 or less as determined by the weighted_score
-    function.
+    '''Removes entries from dataframe that have a weighted protein protein interaction score of 2 or less
+    as determined by the weighted_score function.
     '''
     df['Publication Identifier(s)'] = np.where((df['Weighted_score'] > 2), df['Publication Identifier(s)'], np.nan)
     return df.dropna(axis=0).reset_index(drop=True)

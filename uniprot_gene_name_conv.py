@@ -1,6 +1,6 @@
 '''
 Script locates common gene names for UniProtKB IDs in a dataframe returned from the id_converter script. The dictionary
-referenced is 'HUMAN_9606_idmapping.dat' downloaded from:
+referenced for these gene names is 'HUMAN_9606_idmapping.dat' downloaded from:
 ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/idmapping/
 '''
 import id_converter
@@ -10,7 +10,8 @@ import pandas as pd
 
 def find_gene_name(df, label):
     '''Finds the corresponding common gene name for each human UniProtKB ID in the df returned by the run function
-    of id_converter. If gene name is not found then it is likely a not human or not a protein.
+    of id_converter. If gene name is not found then it is likely a not human or not a protein and will be dropped later
+    in the clean_file script.
     '''
     reader = pd.read_csv(('ID_conversion_files/' + 'HUMAN_9606_idmapping.dat'), delimiter="\t",
                          names=['UniProtKB_ID', 'Identifier', 'Value'])
@@ -25,7 +26,8 @@ def find_gene_name(df, label):
 
 def interactor_column(df, query_gene_name):
     '''Generates a column that specifies only the interactors of the query protein. i.e. if the query protein is
-    MST1R and the interactor is MAPK, the MAPK would populate the "Interactor Name' column.
+    MST1R and the interactor is MAPK for a specific row, then MAPK would populate the "Interactor Name' column for
+    that row.
     '''
     df['Interactor name'] = np.where(df['Parsed A gene name'] != query_gene_name,
                                                     df['Parsed A gene name'], np.nan)

@@ -3,6 +3,7 @@ import os.path
 
 def check_install():
     ''' Checks if 'biogrid_uniprot_conversion.csv' is installed to the directory, returns True if it is.
+    Return False if it is not, which triggers the installation of 'biogrid_uniprot_conversion.csv' to the directory.
     '''
     print('Checking if biogrid_uniprot_conversion.csv is installed...')
     return True if os.path.isfile('ID_conversion_files/biogrid_uniprot_conversion.csv') else False

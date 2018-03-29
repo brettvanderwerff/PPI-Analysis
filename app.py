@@ -1,8 +1,9 @@
 '''Protein-Protein-Interaction-Network-Analysis main app file runs the protein protein interaction program
-by calling all the needed scripts in order via the run function. The run function takes the name of a psi mitlab
+by calling all the needed scripts in order via the run function. The run function takes the name of a psi-mitlab
 file downloaded from http://www.ebi.ac.uk/Tools/webservices/psicquic/view/ as an argument and also takes the
-the common gene name of the query gene as an argument. Depending of the size of the psi mitlab file this
-program can take several minutes to run.
+the common gene name of the query gene as an argument. Depending of the size of the psi mitlab-file this
+program can take several minutes to run. The program will take several additional minutes to run if it is being run
+for the first time.
 '''
 import biogrid_uniprot_conv
 import calc_weighted_score
