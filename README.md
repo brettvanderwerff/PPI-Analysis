@@ -16,7 +16,7 @@ pandas==0.22.0
 
 - 'BIOGRID-IDENTIFIERS-3.4.158.tab.txt' gotten from: https://downloads.thebiogrid.org/BioGRID/Release-Archive/BIOGRID-3.4.158/
 
-- 'HUMAN_9606_idmapping.dat' gotten from: ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/idmapping/
+- 'HUMAN_9606_idmapping.dat' gotten from: ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/idmapping/by_organism/
 
 **Download and place this file in the  'CRAPome files' folder in the main directory:**
 
@@ -27,7 +27,7 @@ http://www.ebi.ac.uk/Tools/webservices/psicquic/view/ and selecting Biogrid, Inn
 
 **Note: Names of files placed in the 'ID_conversion_files' and 'CRAPome files' folders must match those given above. Files downloaded from the above resources will need to be unzipped if they are downloaded in a zipped format.**
 
-**Note: This program is only compatible with Python 3**
+**Note: This program is only compatible with Python 3 and has only been tested on windows 10**
 
 ~~~~~~~~~~~~~~~~~~~~~~~
 How to run this program:
