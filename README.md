@@ -1,4 +1,4 @@
-# Protein-Protein-Interaction-Network-Analysis
+# Protein-Protein-Interaction-Analyzer
 
 This program is intended to analyze protein protein interaction networks via analysis of data obtained from the PSICQUIC web app (http://www.ebi.ac.uk/Tools/webservices/psicquic/view/).
 This is a Python implementation of the technique described in the 2017 paper "Weighted Protein Interaction Network Analysis of Frontotemporal Dementia" by Ferrari et al.
